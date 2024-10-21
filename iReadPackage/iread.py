@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 # This is the command line entry point to call intron retention.
 # coded at: Central South University, Changsha 410083, P.R. China
 # coded by: Hongdong Li. 
