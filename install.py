@@ -1,26 +1,40 @@
-#!/bin/bash
+import os
+import shutil
+import subprocess
+import sys
 
-# Install Python dependencies
-pip install -r requirements.txt
+# Function to install Python dependencies
+def install_requirements():
+    if os.path.exists('requirements.txt'):
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
 
-# Check for required non-Python executables
-REQUIRED_EXECUTABLES=("samtools" "bedops")
+# Function to copy scripts to /usr/local/bin and make them executable
+def install_scripts():
+    source_dir = 'iReadPackage'
+    destination_dir = '/usr/local/bin'
 
-for exe in "${REQUIRED_EXECUTABLES[@]}"; do
-    if ! command -v $exe &> /dev/null; then
-        echo "$exe is not installed. Please install it."
-        exit 1
-    fi
-done
+    # Ensure destination directory exists
+    if not os.path.exists(destination_dir):
+        os.makedirs(destination_dir)
 
-# Copy executables to /usr/local/bin
-echo "Copying scripts to /usr/local/bin..."
+    # Search for all Python files in the iReadPackage directory
+    for root, dirs, files in os.walk(source_dir):
+        for file in files:
+            full_file_path = os.path.join(root, file)
+            dest_file_path = os.path.join(destination_dir, os.path.basename(file))
+            print(f"Copying {full_file_path} to {dest_file_path}")
+            shutil.copy2(full_file_path, dest_file_path)
+            os.chmod(dest_file_path, 0o755)  # Make the script executable
 
-SCRIPTS=$(find iReadPackage/ -maxdepth 1)
-for script in "${SCRIPTS[@]}"; do
-    cp "$script" "/usr/local/bin/$(basename "$script")"  # Copy to /usr/local/bin
-    chmod +x "/usr/local/bin/$(basename "$script")"  # Make it executable
-done
+# Main installation routine
+def main():
+    print("Installing requirements...")
+    install_requirements()
 
-echo "Installation complete! You can now run the scripts from anywhere."
+    print("Installing scripts...")
+    install_scripts()
 
+    print("Installation complete!")
+
+if __name__ == '__main__':
+    main()
